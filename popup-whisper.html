@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whisper Transcription</title>
+  <style>
+    body {
+      width: 350px;
+      min-height: 400px;
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .header p {
+      margin: 10px 0 0 0;
+      opacity: 0.9;
+      font-size: 14px;
+    }
+
+    .status-section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .status-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .status-label {
+      font-weight: 500;
+    }
+
+    .status-value {
+      font-weight: 600;
+    }
+
+    .status-value.recording {
+      color: #ff6b6b;
+    }
+
+    .status-value.ready {
+      color: #51cf66;
+    }
+
+    .status-value.not-ready {
+      color: #ffd43b;
+    }
+
+    .controls-section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 10px;
+    }
+
+    .btn:last-child {
+      margin-bottom: 0;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .info-section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .info-title {
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .info-text {
+      font-size: 14px;
+      line-height: 1.5;
+      opacity: 0.9;
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎤 Whisper Transcription</h1>
+    <p>Local AI-powered transcription for Google Meet</p>
+  </div>
+
+  <div class="status-section">
+    <div class="status-item">
+      <span class="status-label">Whisper Status:</span>
+      <span id="whisper-status" class="status-value">Loading...</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Recording:</span>
+      <span id="recording-status" class="status-value">Stopped</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Segments:</span>
+      <span id="segments-count" class="status-value">0</span>
+    </div>
+  </div>
+
+  <div class="controls-section">
+    <button id="toggle-recording" class="btn btn-primary" disabled>
+      <span class="loading">
+        <div class="spinner"></div>
+        Initializing...
+      </span>
+    </button>
+    <button id="clear-transcript" class="btn btn-secondary" disabled>
+      Clear Transcript
+    </button>
+    <button id="show-transcript" class="btn btn-secondary" disabled>
+      Show Transcript
+    </button>
+  </div>
+
+  <div class="info-section">
+    <div class="info-title">How to use:</div>
+    <div class="info-text">
+      1. Join a Google Meet call<br>
+      2. Click "Start Recording" to begin transcription<br>
+      3. Speak clearly for best results<br>
+      4. Click "Show Transcript" to view live transcription
+    </div>
+  </div>
+
+  <script src="popup-whisper.js"></script>
+</body>
+</html> 
